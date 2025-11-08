@@ -28,8 +28,11 @@ export async function setupVite(app: Express, server: any) {
   app.use(async (req, res, next) => {
     const url = req.originalUrl;
 
-    // Only handle HTML requests, let Vite handle assets
-    if (url.includes('.') && !url.endsWith('.html')) {
+    // Only serve HTML for actual page requests, not for assets or Vite virtual modules
+    // Skip if: not requesting HTML, has file extension, or is a Vite internal path
+    if (!req.headers.accept?.includes('text/html') || 
+        (url.includes('.') && !url.endsWith('.html')) ||
+        url.startsWith('/@')) {
       return next();
     }
 
