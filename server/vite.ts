@@ -28,6 +28,11 @@ export async function setupVite(app: Express, server: any) {
   app.use(async (req, res, next) => {
     const url = req.originalUrl;
 
+    // Only handle HTML requests, let Vite handle assets
+    if (url.includes('.') && !url.endsWith('.html')) {
+      return next();
+    }
+
     try {
       const clientPath = path.resolve(process.cwd(), "client");
       let template = fs.readFileSync(
