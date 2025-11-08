@@ -89,14 +89,34 @@ Respond with a JSON array of items. If no items are found, return an empty array
       contents: transcript,
     });
 
-    const rawJson = response.text;
+    // Extract text from response - try multiple paths for compatibility
+    let rawJson: string | undefined;
+    
+    // Try direct text property first (newer SDK)
+    if (response.text) {
+      rawJson = response.text;
+    }
+    // Try accessing through candidates (fallback)
+    else if (response.candidates && 
+             response.candidates.length > 0 && 
+             response.candidates[0].content &&
+             response.candidates[0].content.parts &&
+             response.candidates[0].content.parts.length > 0) {
+      rawJson = response.candidates[0].content.parts[0].text;
+    }
     
     if (!rawJson) {
+      console.warn('No text found in Gemini response');
       return [];
     }
 
-    const items = JSON.parse(rawJson) as Array<InsertInventoryItem>;
-    return items;
+    try {
+      const items = JSON.parse(rawJson) as Array<InsertInventoryItem>;
+      return items;
+    } catch (parseError) {
+      console.error('Failed to parse Gemini JSON response:', rawJson, parseError);
+      return [];
+    }
   } catch (error) {
     console.error('Gemini parsing error:', error);
     throw new Error('Failed to parse inventory items');

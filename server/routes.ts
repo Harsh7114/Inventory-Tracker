@@ -120,15 +120,39 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  // Voice processing route
+  // Voice processing route - transcribes audio, parses items, and saves to database
   app.post("/api/voice/process", upload.single("audio"), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No audio file provided" });
       }
 
-      const result = await processVoiceInput(req.file.buffer);
-      res.json(result);
+      // Transcribe and parse items from audio
+      const { transcript, items } = await processVoiceInput(req.file.buffer);
+      
+      // Insert each parsed item into the database with validation
+      const insertedItems = [];
+      const failedItems = [];
+      
+      for (const item of items) {
+        try {
+          // Validate item against schema before insertion
+          const validatedItem = insertInventoryItemSchema.parse(item);
+          const inserted = await storage.createInventoryItem(validatedItem);
+          insertedItems.push(inserted);
+        } catch (itemError) {
+          console.error("Failed to validate or insert item:", item, itemError);
+          failedItems.push({ item, error: itemError instanceof Error ? itemError.message : "Unknown error" });
+          // Continue with other items even if one fails
+        }
+      }
+
+      res.json({
+        transcript,
+        items: insertedItems,
+        count: insertedItems.length,
+        failed: failedItems.length > 0 ? failedItems : undefined,
+      });
     } catch (error) {
       console.error("Voice processing error:", error);
       res.status(500).json({ 
