@@ -22,6 +22,7 @@ export class MemStorage implements IStorage {
       quantity: 10,
       category: "Electronics",
       location: "Warehouse A",
+      reorderThreshold: 5,
       lastUpdated: new Date().toISOString(),
     },
     {
@@ -30,6 +31,7 @@ export class MemStorage implements IStorage {
       quantity: 25,
       category: "Furniture",
       location: "Warehouse B",
+      reorderThreshold: 10,
       lastUpdated: new Date().toISOString(),
     },
     {
@@ -38,6 +40,7 @@ export class MemStorage implements IStorage {
       quantity: 5,
       category: "Electronics",
       location: "Warehouse A",
+      reorderThreshold: 3,
       lastUpdated: new Date().toISOString(),
     },
   ];

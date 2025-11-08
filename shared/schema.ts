@@ -6,6 +6,7 @@ export const inventoryItemSchema = z.object({
   quantity: z.number(),
   category: z.string(),
   location: z.string(),
+  reorderThreshold: z.number(),
   lastUpdated: z.string(),
 });
 

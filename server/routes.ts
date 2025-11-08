@@ -1,6 +1,10 @@
 import type { Express } from "express";
+import multer from "multer";
 import { storage } from "./storage";
 import { insertInventoryItemSchema, insertNotificationSchema } from "../shared/schema";
+import { processVoiceInput } from "./voice";
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 export function registerRoutes(app: Express) {
   // Inventory routes
@@ -113,6 +117,23 @@ export function registerRoutes(app: Express) {
         return res.status(404).json({ error: "Notification not found" });
       }
       res.status(500).json({ error: "Failed to delete notification" });
+    }
+  });
+
+  // Voice processing route
+  app.post("/api/voice/process", upload.single("audio"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No audio file provided" });
+      }
+
+      const result = await processVoiceInput(req.file.buffer);
+      res.json(result);
+    } catch (error) {
+      console.error("Voice processing error:", error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to process voice input" 
+      });
     }
   });
 }
