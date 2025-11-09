@@ -45,14 +45,17 @@ A production-ready full-stack inventory management system with AI-powered voice-
 ## Recent Changes (November 9, 2025)
 
 ### Deployment Configuration (Latest)
-- **Fixed Replit deployment white screen issue** caused by server using Vite dev server in production
+- **Fixed Replit deployment crash loop** caused by missing dist folder
+- **Fixed white screen issue** caused by server using Vite dev server in production
 - Server now conditionally uses:
   - **Development**: Vite dev server with HMR (`setupVite()`)
   - **Production**: Static file serving from `dist/public` (`serveStatic()`)
 - Database schema is now **automatically created at runtime** (before server starts)
-- Updated `start` script to run `db:push && NODE_ENV=production tsx server/index.ts`
-- Build script remains environment-agnostic (only builds frontend)
-- Deployment workflow: Build frontend → Push DB schema → Start server → Serve static files
+- Build output optimized: `vite build --outDir ../dist/public` creates dist/public at project root
+- Updated `start` script to run `npm run db:push && NODE_ENV=production tsx server/index.ts`
+- Deployment workflow (Replit autoscale):
+  1. Build phase: `npm run build` → creates dist/public
+  2. Run phase: `npm start` → pushes DB schema → starts server → serves static files
 - No manual database initialization required for Replit deployments
 - Fixed `_jsxDEV is not a function` error that caused blank screens
 
