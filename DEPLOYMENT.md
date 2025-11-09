@@ -58,21 +58,36 @@ PORT=5000
    - Click "Import from GitHub"
    - Enter your repository URL
 
-2. **Configure Environment**
+2. **Configure Environment (Secrets)**
    - Click on "Secrets" (lock icon) in the left sidebar
-   - Add all required environment variables
+   - Add all required environment variables:
+     - `DATABASE_URL`
+     - `ASSEMBLYAI_API_KEY`
+     - `GEMINI_API_KEY`
+   - **Note**: Workspace secrets are automatically synced to deployments
 
 3. **Set up Database**
-   - Replit offers PostgreSQL database integration
-   - In the Tools panel, add "PostgreSQL"
-   - Database credentials will be automatically added to secrets
+   - Use external PostgreSQL provider (Supabase, Neon, etc.)
+   - Or use Replit's built-in PostgreSQL
+   - Add the `DATABASE_URL` to Secrets
 
-4. **Configure Run Command**
-   - Set the run command to: `npm run dev`
+4. **Deploy**
+   - Go to **Tools** → **Publishing**
+   - Click **"Publish"** or **"Deploy"**
+   - The deployment will:
+     - Build the frontend (`npm run build`)
+     - **Automatically create database tables** (`db:push` runs at startup)
+     - Start the server (`npm run start`)
+   
+5. **Verify Deployment**
+   - Check **Logs** tab in Publishing tool
+   - Look for: "Pushing database schema..." → "Server running on port 5000"
+   - Test the published URL
 
-5. **Deploy**
-   - Click "Run" to start the application
-   - For production, use Replit Deployments for custom domains and scaling
+**Important Notes**:
+- ✅ Database tables are **automatically created on startup** - no manual migration needed
+- ✅ Secrets are **automatically synced** from workspace to deployment
+- ✅ The app will create the schema every time it starts (safe to redeploy)
 
 ---
 
@@ -280,14 +295,27 @@ If you're using an external database provider:
 
 ### Database Migrations
 
-After deploying, run these commands to set up your database:
+#### Automatic Migration (Replit Deployments)
+
+For Replit deployments, database tables are **automatically created on startup**. No manual commands needed!
+
+The `npm run start` script runs `db:push` before starting the server, ensuring tables exist.
+
+#### Manual Migration (Other Platforms)
+
+For other platforms (Vercel, Railway, Render, Heroku), run these commands after deploying:
 
 ```bash
-# Push schema to database
+# Push schema to database (creates tables)
 npm run db:push
 
-# Seed database with initial data
+# Seed database with initial data (optional)
 npm run db:seed
+```
+
+**Tip**: You can also add `npm run db:push &&` to your start command on other platforms:
+```json
+"start": "npm run db:push && NODE_ENV=production tsx server/index.ts"
 ```
 
 ---

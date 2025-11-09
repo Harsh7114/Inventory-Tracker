@@ -42,7 +42,17 @@ A production-ready full-stack inventory management system with AI-powered voice-
 - **Build Tool**: Vite
 - **Validation**: Zod schemas with type safety
 
-## Recent Changes (November 8, 2025)
+## Recent Changes (November 9, 2025)
+
+### Deployment Configuration (Latest)
+- **Fixed Replit deployment white screen issue**
+- Database schema is now **automatically created at runtime** (before server starts)
+- Updated `start` script to run `db:push && tsx server/index.ts` in production
+- Build script remains environment-agnostic (only builds frontend)
+- Deployment workflow: Build frontend → Push DB schema → Start server
+- No manual database initialization required for Replit deployments
+
+## Previous Changes (November 8, 2025)
 
 ### Database Migration to Production
 - Migrated from in-memory storage to PostgreSQL with Drizzle ORM
