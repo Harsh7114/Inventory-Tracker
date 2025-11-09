@@ -1,6 +1,6 @@
 import express from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, log } from "./vite";
+import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 app.use(express.json());
@@ -38,7 +38,13 @@ app.use((req, res, next) => {
 
 (async () => {
   registerRoutes(app);
-  await setupVite(app, app);
+  
+  // Use Vite dev server in development, serve static files in production
+  if (process.env.NODE_ENV === "production") {
+    serveStatic(app);
+  } else {
+    await setupVite(app, app);
+  }
 
   const PORT = 5000;
   app.listen(PORT, "0.0.0.0", () => {
