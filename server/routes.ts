@@ -120,12 +120,35 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // Health check endpoint to verify environment variables
+  app.get("/api/health", async (_req, res) => {
+    res.json({
+      status: "ok",
+      hasAssemblyAI: !!process.env.ASSEMBLYAI_API_KEY,
+      hasGemini: !!process.env.GEMINI_API_KEY,
+      hasDatabase: !!process.env.DATABASE_URL,
+      nodeEnv: process.env.NODE_ENV,
+    });
+  });
+
   // Voice processing route - transcribes audio, parses items, and saves to database
   app.post("/api/voice/process", upload.single("audio"), async (req, res) => {
     try {
+      // Check if API keys are available
+      if (!process.env.ASSEMBLYAI_API_KEY) {
+        console.error("ASSEMBLYAI_API_KEY is not set");
+        return res.status(500).json({ error: "AssemblyAI API key is not configured" });
+      }
+      if (!process.env.GEMINI_API_KEY) {
+        console.error("GEMINI_API_KEY is not set");
+        return res.status(500).json({ error: "Gemini API key is not configured" });
+      }
+
       if (!req.file) {
         return res.status(400).json({ error: "No audio file provided" });
       }
+
+      console.log("Processing voice input, file size:", req.file.size);
 
       // Transcribe and parse items from audio
       const { transcript, items } = await processVoiceInput(req.file.buffer);

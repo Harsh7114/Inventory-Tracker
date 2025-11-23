@@ -4,13 +4,22 @@ import { AssemblyAI } from 'assemblyai';
 import { GoogleGenAI } from '@google/genai';
 import type { InsertInventoryItem } from '../shared/schema';
 
-const assemblyai = new AssemblyAI({
-  apiKey: process.env.ASSEMBLYAI_API_KEY || '',
-});
+// Lazy initialization to ensure environment variables are loaded
+function getAssemblyAI() {
+  const apiKey = process.env.ASSEMBLYAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('ASSEMBLYAI_API_KEY is not set');
+  }
+  return new AssemblyAI({ apiKey });
+}
 
-const genai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || '',
-});
+function getGeminiAI() {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY is not set');
+  }
+  return new GoogleGenAI({ apiKey });
+}
 
 export interface VoiceProcessingResult {
   transcript: string;
@@ -22,6 +31,7 @@ export interface VoiceProcessingResult {
  */
 async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
   try {
+    const assemblyai = getAssemblyAI();
     const transcript = await assemblyai.transcripts.transcribe({
       audio: audioBuffer,
     });
@@ -42,6 +52,7 @@ async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
  */
 async function parseInventoryItems(transcript: string): Promise<Array<InsertInventoryItem>> {
   try {
+    const genai = getGeminiAI();
     const systemPrompt = `You are an inventory management assistant. Extract grocery/inventory items from the user's speech.
 For each item mentioned, extract:
 - name: The item name (e.g., "apples", "milk", "rice")

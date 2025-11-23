@@ -4,8 +4,10 @@ import { registerRoutes } from "../server/routes";
 import { serveStatic, log } from "../server/vite";
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
+// Increase body size limit for file uploads (10MB)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -45,6 +47,6 @@ if (process.env.NODE_ENV === "production") {
   serveStatic(app);
 }
 
-// Export for Vercel serverless
+// Vercel serverless function handler
 export default app;
 
