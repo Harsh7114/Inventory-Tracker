@@ -38,3 +38,7 @@ Thumbs.db
 
 # Lock files
 bun.lockb
+
+# TSX timestamp files
+**/*.timestamp-*.mjs
+client/vite.config.ts.timestamp-*

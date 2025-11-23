@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { registerRoutes } from "../server/routes";
+import { serveStatic, log } from "../server/vite";
 
 const app = express();
 app.use(express.json());
@@ -37,18 +37,14 @@ app.use((req, res, next) => {
   next();
 });
 
-(async () => {
-  registerRoutes(app);
-  
-  // Use Vite dev server in development, serve static files in production
-  if (process.env.NODE_ENV === "production") {
-    serveStatic(app);
-  } else {
-    await setupVite(app, app);
-  }
+// Initialize routes
+registerRoutes(app);
 
-  const PORT = 5000;
-  app.listen(PORT, "0.0.0.0", () => {
-    log(`Server running on port ${PORT}`);
-  });
-})();
+// Serve static files in production
+if (process.env.NODE_ENV === "production") {
+  serveStatic(app);
+}
+
+// Export for Vercel serverless
+export default app;
+
